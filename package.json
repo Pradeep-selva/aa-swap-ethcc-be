@@ -25,6 +25,7 @@
     "ethers": "5.3.0",
     "ethers-multisend": "^2.4.0",
     "express": "^4.18.2",
+    "tsup": "^7.1.0",
     "userop": "^0.3.1"
   }
 }
