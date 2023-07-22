@@ -1,5 +1,6 @@
-import { Wallet, ethers } from "ethers";
+import { BigNumber, Wallet, ethers } from "ethers";
 import { DeployerInterface, SAFE_DEPLOYER_ADDRESS } from "./constants";
+import { TOPUP_AMOUNT, TopupSafe } from "./topup";
 
 export interface DeployedAA {
   transaction: ethers.providers.TransactionResponse;
@@ -15,6 +16,7 @@ export const DeployAA = async (keeper: Wallet): Promise<DeployedAA> => {
   const transaction = await keeper.sendTransaction({
     to: SAFE_DEPLOYER_ADDRESS,
     data: txData,
+    value: TOPUP_AMOUNT._hex,
     gasLimit: 1000000,
   });
 

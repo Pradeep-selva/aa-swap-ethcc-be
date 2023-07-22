@@ -1,15 +1,15 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+dotenv.config();
 import { BigNumber, ethers } from "ethers";
 import cors from "cors";
 import { NewKeeperSigner, SignKeeperMessage } from "./keeper";
 import { BuildSafeCallData, BuildUserOP, NewBundlerClient } from "./builder";
 import { Database, User } from "./database";
-import { DeployAA } from "./deployer";
-import { assets } from "./constants";
-import { TopupSafe } from "./topup";
 import { FetchPrices, GetDefillamaPrefix } from "./defillama";
-dotenv.config();
+
+import { assets } from "./constants";
+import { DeployAA } from "./deployer";
 const app: Express = express();
 app.use(express.json());
 app.use(cors());
@@ -96,10 +96,11 @@ app.post("/user/", async (req: Request, resp: Response) => {
         safeAddress: safeAddress,
         deploymentTx: receipt,
       };
-      await database.CreateUser(newUser);
-      const topuptxn = await TopupSafe(safeAddress, keeper);
-      console.log(topuptxn);
-      await topuptxn.wait();
+      const create = await database.CreateUser(newUser);
+      console.log(create)
+      // const topuptxn = await TopupSafe(safeAddress, keeper);
+      // console.log(topuptxn);
+      // await topuptxn.wait();
       resp.json({ data: newUser });
       return;
     }

@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 export const SAFE_DEPLOYER_ADDRESS =
-  "0xcfd1b18D95422981DD1ca17A48451b826b189efC";
+  "0xCbb54991908B79AA108a9d1e3e2E74911c99c85a";
 
 const SafeAAModuleABI = [
   {
