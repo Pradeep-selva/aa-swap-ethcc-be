@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.19;
 
-import "../interfaces/safe/IGnosisSafe.sol";
-import "../interfaces/safe/Types.sol";
+import "../../interfaces/safe/IGnosisSafe.sol";
+import "../../interfaces/safe/Types.sol";
 
 library SafeHelper {
     error InvalidMultiSendCall(uint256);
