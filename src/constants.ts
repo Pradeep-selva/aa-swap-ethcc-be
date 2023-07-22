@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
-export const SAFE_DEPLOYER_ADDRESS = "0x797c1228Ec6EECD03E16d40dD722add49E5209EE"
+export const SAFE_DEPLOYER_ADDRESS =
+  "0xcfd1b18D95422981DD1ca17A48451b826b189efC";
 
 const SafeAAModuleABI = [
   {
@@ -242,11 +243,11 @@ const DeployerAbi = [
       {
         indexed: true,
         internalType: "address",
-        name: "consoleAddress",
+        name: "account",
         type: "address",
       },
     ],
-    name: "brahConsoleDeployed",
+    name: "DeployedAaAccount",
     type: "event",
   },
   {
@@ -287,13 +288,8 @@ const DeployerAbi = [
         name: "_threshold",
         type: "uint256",
       },
-      {
-        internalType: "address",
-        name: "_feeToken",
-        type: "address",
-      },
     ],
-    name: "deployConsoleAccount",
+    name: "deployAaAccount",
     outputs: [
       {
         internalType: "address",
@@ -344,4 +340,78 @@ export const SafeMultiSendInterface = new ethers.utils.Interface(
   SafeMultiSendABI
 );
 
-export const DeployerInterface = new ethers.utils.Interface(DeployerAbi)
+export const DeployerInterface = new ethers.utils.Interface(DeployerAbi);
+
+export const assets = {
+  5: [
+    {
+      name: "ETH",
+      address: "0x0000000000000000000000000000000000000000",
+      logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DETH.svg",
+      decimals: 18,
+      chainId: 5,
+      prices: { default: 1902.6 },
+      apy: 0,
+      actions: [] as any,
+      value: "",
+    },
+    {
+      name: "GNO",
+      address: "0x02ABBDbAaa7b1BB64B5c878f7ac17f8DDa169532",
+      logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DGNO.svg",
+      decimals: 18,
+      chainId: 5,
+      prices: { default: 1 },
+      apy: 0,
+      actions: [] as any,
+      value: "",
+    },
+    {
+      name: "WETH",
+      address: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DWETH.svg",
+      decimals: 18,
+      chainId: 5,
+      prices: { default: 1903.57 },
+      apy: 0,
+      actions: [] as any,
+      value: "",
+    },
+    {
+      name: "USDC",
+      address: "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+      logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DUSDC.svg",
+      decimals: 6,
+      chainId: 5,
+      prices: { default: 1 },
+      apy: 0,
+      actions: [] as any,
+      value: "",
+    },
+  ],
+  100: [
+    {
+      name: "xDAI",
+      address: "0x0000000000000000000000000000000000000000",
+      logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png",
+      decimals: 18,
+      chainId: 100,
+      prices: { default: 1902.6 },
+      apy: 0,
+      actions: [] as any,
+      value: "",
+    },
+   
+    {
+      name: "WETH",
+      address: "0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1",
+      logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DWETH.svg",
+      decimals: 18,
+      chainId: 100,
+      prices: { default: 1903.57 },
+      apy: 0,
+      actions: [] as any,
+      value: "",
+    },
+  ],
+};
