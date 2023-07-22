@@ -1,0 +1,16 @@
+cache/
+out/
+.env
+node_modules/
+broadcast/
+artifacts/
+cache_hardhat/
+typechain-types/
+.gas-snapshot
+lcov.info
+report/
+slither.md
+slither.sarif
+verification_json/
+flatten/
+.DS_Store
