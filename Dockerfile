@@ -1,8 +1,5 @@
-FROM  node:current-alpine
+FROM  node:current-bullseye-slim
 WORKDIR /app
-
-RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*
-
 
 COPY package.json ./
 
