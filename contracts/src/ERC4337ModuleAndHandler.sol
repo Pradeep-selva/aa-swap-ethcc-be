@@ -4,9 +4,14 @@ pragma solidity 0.8.19;
 import "safe-contracts/contracts/libraries/SafeStorage.sol";
 import "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 
-import {UserOperation} from "./libs/UserOperation.sol";
+import {UserOperation} from "./libs/aa/UserOperation.sol";
 import {IGnosisSafe, Enum} from "./interfaces/safe/IGnosisSafe.sol";
 
+/**
+ * @title ERC4337ModuleAndHandler
+ * @notice This contract is a hybrid module and fallback handler for gnosis safes 
+ * to support account abstraction.
+ */
 contract ERC4337ModuleAndHandler is SafeStorage {
     error InvalidSignature();
 
