@@ -9,7 +9,7 @@ contract DeployProtocol is Script {
     address constant broadcaster = 0xAE75B29ADe678372D77A8B41225654138a7E6ff1;
     address constant entrypoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789;
 
-    function run() public {
+    function deploy() public {
         vm.startBroadcast();
 
         ERC4337ModuleAndHandler handler = new ERC4337ModuleAndHandler(entrypoint, broadcaster);
@@ -19,7 +19,7 @@ contract DeployProtocol is Script {
         owners[0] = address(broadcaster);
         uint256 threshold = 1;
 
-        address safe = deployer.deployConsoleAccount(owners, threshold);
+        address safe = deployer.deployAaAccount(owners, threshold);
         address[] memory _owners = IGnosisSafe(safe).getOwners();
         
         console.log("Safe deployer: %s", address(deployer));
