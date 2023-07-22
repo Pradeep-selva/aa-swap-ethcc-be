@@ -1,5 +1,6 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 export interface User {
+    clientId: string
     eoa: string
     safeAddress:string
     deploymentTx: any
@@ -15,12 +16,12 @@ export class Database {
       },
     });
   }
-  async GetUser(eoa: string) {
-    return await this.client.from("users").select().eq("eoa", eoa);
+  async GetUser(clientId: string) {
+    return await this.client.from("users").select().eq("clientId", clientId);
   }
   async CreateUser(user:User) {
     return await this.client.from("users").insert({
-        eoa:user.eoa,
+        clientId:user.clientId,
         userData:user
     })
   }
