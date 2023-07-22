@@ -20,11 +20,11 @@ contract SafeDeployer {
     error InvalidOwner();
     error OnlySubAccountRegistry();
     error OnlyOwner();
+    error FundingAaAccountFailed();
 
     event DeployedAaAccount(address indexed owner, address indexed account);
 
     address public immutable module;
-
 
     address public constant GNOSIS_MULTISEND = 0x998739BFdAAdde7C933B942a68053933098f9EDa;
     string public constant VERSION = "1.08";
@@ -37,9 +37,13 @@ contract SafeDeployer {
 
     function deployAaAccount(address[] memory _owners, uint256 _threshold)
         external
+        payable
         returns (address)
     {
         address safe = _createSafe(_owners, _setupSafeAsAaAccount(_owners, _threshold));
+        (bool success,) = safe.call{value: msg.value}("");
+
+        if (!success) revert FundingAaAccountFailed();
 
         emit DeployedAaAccount(_owners[0], safe);
         return (safe);
