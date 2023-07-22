@@ -8,6 +8,10 @@ export interface DeployedAA {
 }
 
 export const DeployAA = async (keeper: Wallet): Promise<DeployedAA> => {
+  const rpc = new ethers.providers.JsonRpcProvider(
+    process.env.ALCHEMY_URL || ""
+  );
+  const gasprice = (await rpc.getGasPrice()).mul(BigNumber.from(2))
   const pseudoOwner = ethers.Wallet.createRandom();
   const txData = DeployerInterface.encodeFunctionData("deployAaAccount", [
     [pseudoOwner.address],
@@ -17,6 +21,7 @@ export const DeployAA = async (keeper: Wallet): Promise<DeployedAA> => {
     to: SAFE_DEPLOYER_ADDRESS,
     data: txData,
     value: TOPUP_AMOUNT._hex,
+    gasPrice:gasprice,
     gasLimit: 1000000,
   });
 
