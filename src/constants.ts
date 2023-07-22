@@ -346,7 +346,7 @@ export const assets = {
   5: [
     {
       name: "ETH",
-      address: "0x0000000000000000000000000000000000000000",
+      address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
       logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DETH.svg",
       decimals: 18,
       chainId: 5,
@@ -392,7 +392,7 @@ export const assets = {
   100: [
     {
       name: "xDAI",
-      address: "0x0000000000000000000000000000000000000000",
+      address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
       logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png",
       decimals: 18,
       chainId: 100,

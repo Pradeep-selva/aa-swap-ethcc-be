@@ -8,6 +8,7 @@ import { Database, User } from "./database";
 import { DeployAA } from "./deployer";
 import { assets } from "./constants";
 import { TopupSafe } from "./topup";
+import { FetchPrices, GetDefillamaPrefix } from "./defillama";
 dotenv.config();
 const app: Express = express();
 app.use(express.json());
@@ -15,23 +16,39 @@ app.use(cors());
 const rpcProvider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
 const keeper = NewKeeperSigner(rpcProvider);
 const database = new Database();
-app.get("/user/:eoa", async (req: Request, resp: Response) => {
+app.get("/user/:clientId", async (req: Request, resp: Response) => {
   try {
-    const user = await database.GetUser(req.params.eoa);
-    resp.json({ data: user.data?.[0] });
+    const user = await database.GetUser(req.params.clientId);
+    resp.json({ data: user.data?.[0] || null });
   } catch (error) {
     resp.json({ err: error });
   }
 });
 app.get("/assets/:chainId", async (req: Request, resp: Response) => {
   try {
-    const tokens = assets[req.params.chainId];
+    let tokens = assets[req.params.chainId];
     if (!tokens) {
       resp.json({ err: "invalid chain-id" });
       return;
     }
+    const prices = await FetchPrices(
+      tokens.map((token) => token.address),
+      req.params.chainId
+    );
+    tokens = tokens.map((token) => {
+      return {
+        ...token,
+        prices: {
+          default:
+            prices?.coins[
+              GetDefillamaPrefix(req.params.chainId) + ":" + token.address
+            ]?.price || 0,
+        },
+      };
+    })
     resp.json({ data: tokens });
   } catch (error) {
+    console.log(error);
     resp.json({ err: error });
   }
 });
@@ -56,24 +73,26 @@ app.get("/order/:safe", async (req: Request, resp: Response) => {
 });
 app.post("/user/", async (req: Request, resp: Response) => {
   try {
-    const { eoa } = req.body;
-    console.log(eoa);
-    if (!eoa) {
+    const { clientId } = req.body;
+    if (!clientId) {
       resp.json({ err: "no eao defined" });
     }
-    const user = await database.GetUser(eoa);
+    const user = await database.GetUser(clientId);
     if (!user.data) {
       resp.json({ err: "no data defined" });
       return;
     }
     if (user.data?.length == 0) {
-      const transaction = await DeployAA(eoa, keeper);
-      console.log(transaction);
-      await transaction.wait();
-      const receipt = await rpcProvider.getTransactionReceipt(transaction.hash);
+      const deploymentMetadata = await DeployAA(keeper);
+      console.log(deploymentMetadata);
+      await deploymentMetadata.transaction.wait();
+      const receipt = await rpcProvider.getTransactionReceipt(
+        deploymentMetadata.transaction.hash
+      );
       const safeAddress = receipt.logs[0].address;
       const newUser: User = {
-        eoa: eoa,
+        clientId: clientId,
+        eoa: deploymentMetadata.pseudoOwner,
         safeAddress: safeAddress,
         deploymentTx: receipt,
       };
