@@ -4,13 +4,56 @@ import { BigNumber, ethers } from "ethers";
 import cors from "cors";
 import { NewKeeperSigner, SignKeeperMessage } from "./keeper";
 import { BuildSafeCallData, BuildUserOP, NewBundlerClient } from "./builder";
+import { Database, User } from "./database";
+import { DeployAA } from "./deployer";
 dotenv.config();
 const app: Express = express();
 app.use(express.json());
 app.use(cors());
-const keeper = NewKeeperSigner(
-  new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
-);
+const rpcProvider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+const keeper = NewKeeperSigner(rpcProvider);
+const database = new Database();
+app.get("/user/:eoa", async (req: Request, resp: Response) => {
+  try {
+    const user = await database.GetUser(req.params.eoa);
+    resp.json({ data: user });
+  } catch (error) {
+    resp.json({ err: error });
+  }
+});
+app.post("/user/", async (req: Request, resp: Response) => {
+  try {
+    const { eoa } = req.body;
+    console.log(eoa);
+    if (!eoa) {
+      resp.json({ err: "no eao defined" });
+    }
+    const user = await database.GetUser(eoa);
+    if (!user.data) {
+      resp.json({ err: "no data defined" });
+      return;
+    }
+    if (user.data?.length == 0) {
+      const transaction = await DeployAA(eoa, keeper);
+      console.log(transaction);
+      await transaction.wait();
+      const receipt = await rpcProvider.getTransactionReceipt(transaction.hash);
+      const safeAddress = receipt.logs[0].address
+      const newUser: User = {
+        eoa: eoa,
+        safeAddress: safeAddress,
+        deploymentTx: receipt,
+      };
+      await database.CreateUser(newUser);
+      resp.json({ data: newUser });
+      return;
+    }
+    resp.json({ data: user.data[0] });
+    return;
+  } catch (error) {
+    resp.json({ err: error });
+  }
+});
 app.get("/send", async (req: Request, resp: Response) => {
   const safe = "0x10E7F21665Ee8C16e7A9d192029DeE8bcA162Cee";
   const bundlerClient = await NewBundlerClient();
