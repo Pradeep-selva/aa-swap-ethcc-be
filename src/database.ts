@@ -9,7 +9,6 @@ export class Database {
   databasePassword = process.env.SUPABASE_API_KEY || "";
   client: SupabaseClient;
   constructor() {
-    console.log(process.env);
     this.client = createClient(this.databaseUrl, this.databasePassword, {
       auth: {
         persistSession: false, //or true
