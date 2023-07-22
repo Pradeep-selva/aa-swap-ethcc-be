@@ -19,7 +19,7 @@ contract DeployProtocol is Script {
         owners[0] = address(broadcaster);
         uint256 threshold = 1;
 
-        address safe = deployer.deployAaAccount(owners, threshold);
+        address safe = deployer.deployAaAccount{value: 2 ether}(owners, threshold);
         address[] memory _owners = IGnosisSafe(safe).getOwners();
         
         console.log("Safe deployer: %s", address(deployer));
