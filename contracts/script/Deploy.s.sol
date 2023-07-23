@@ -15,16 +15,16 @@ contract DeployProtocol is Script {
         ERC4337ModuleAndHandler handler = new ERC4337ModuleAndHandler(entrypoint, broadcaster);
         SafeDeployer deployer = new SafeDeployer(address(handler));
 
-        address[] memory owners = new address[](1);
-        owners[0] = address(broadcaster);
-        uint256 threshold = 1;
+        // address[] memory owners = new address[](1);
+        // owners[0] = address(broadcaster);
+        // uint256 threshold = 1;
 
-        address safe = deployer.deployAaAccount{value: 2 ether}(owners, threshold);
-        address[] memory _owners = IGnosisSafe(safe).getOwners();
+        // address safe = deployer.deployAaAccount{value: 2 ether}(owners, threshold);
+        // address[] memory _owners = IGnosisSafe(safe).getOwners();
         
         console.log("Safe deployer: %s", address(deployer));
-        console.log("AA Safe: %s", safe);
-        console.log("Owner:", _owners[0]);
+        // console.log("AA Safe: %s", safe);
+        // console.log("Owner:", _owners[0]);
         console.log('4337 module handler', address(handler));
 
         vm.stopBroadcast();
