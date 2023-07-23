@@ -57,22 +57,14 @@ app.get("/assets/:chainId", async (req: Request, resp: Response) => {
 });
 app.post("/order", async (req: Request, resp: Response) => {
   try {
-    const { clientId } = req.body;
-    const userResponse = await database.GetUser(clientId);
-    const user = userResponse.data?.[0] || null;
-    if (!user) {
-      resp.json({ err: "no clientId defined or user not found" });
-      return;
-    }
-    console.log(user);
-    const safe = user.userData.safeAddress;
+    const { clientId, safe, fromToken, toToken, amount } = req.body;
     const bundlerClient = await NewBundlerClient();
     const callData = await Get1inchRequest(
       137,
       safe,
-      "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-      "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
-      BigNumber.from(1e9).mul(1e8).mul(1).toString()
+      fromToken,
+      toToken,
+      BigNumber.from(amount).toString()
     );
     const safeCallData = BuildSafeCallData([
       {
@@ -89,7 +81,7 @@ app.post("/order", async (req: Request, resp: Response) => {
         return order?.txHash != "";
       }).length || 0;
     const signature = await SignKeeperMessage(keeper, safe, safeCallData);
-    const userOP = await BuildUserOP(safe, safeCallData, signature, nonce + 1);
+    const userOP = await BuildUserOP(safe, safeCallData, signature, nonce );
     const res = await bundlerClient.sendUserOperation(userOP, {
       onBuild: (op) => console.log("Signed UserOperation:", op),
     });
@@ -105,6 +97,7 @@ app.post("/order", async (req: Request, resp: Response) => {
       metadata: {
         callData,
         ev,
+        request: req.body,
         userOp: res,
       },
     };
