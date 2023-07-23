@@ -5,7 +5,7 @@ interface llamaResponse {
     coins: Map<string,coinMetadata>
 }
 export const GetDefillamaPrefix =  (chainId:number) => {
-    return chainId == 100 ? "xdai":"ethereum"
+    return chainId == 137 ? "polygon":"ethereum"
 } 
 export const FetchPrices = async (tokens: string[],chainId: number): Promise<llamaResponse> => {
     const prefix = GetDefillamaPrefix(chainId)
