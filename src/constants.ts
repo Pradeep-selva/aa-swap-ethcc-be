@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 export const SAFE_DEPLOYER_ADDRESS =
-  "0x64e0aEa51495cf1F3A498a67dB561688796c4fD9";
+  "0x44079DE0e5Ac917C220f08fFb8FD164D655FE31e";
 
 const SafeAAModuleABI = [
   {
@@ -405,7 +405,7 @@ export const assets = {
     {
       name: "USDC",
       address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
-      logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DWETH.svg",
+      logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DUSDC.svg",
       decimals: 6,
       chainId: 137,
       apy: 0,
