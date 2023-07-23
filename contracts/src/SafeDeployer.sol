@@ -9,6 +9,7 @@ import "./interfaces/safe/IGnosisMultiSend.sol";
 
 import {Types, SafeHelper} from "./libs/safe/SafeHelper.sol";
 import "./ERC4337ModuleAndHandler.sol";
+import "./interfaces/aa/IStakeManager.sol";
 
 /**
  * @title SafeDeployer
@@ -27,6 +28,7 @@ contract SafeDeployer {
     address public immutable module;
 
     address public constant GNOSIS_MULTISEND = 0x998739BFdAAdde7C933B942a68053933098f9EDa;
+    address public constant AA_ENTRYPOINT = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789;
     string public constant VERSION = "1.08";
 
     mapping(bytes32 ownersHash => uint96 safeCount) public ownerSafeCount;
@@ -41,9 +43,14 @@ contract SafeDeployer {
         returns (address)
     {
         address safe = _createSafe(_owners, _setupSafeAsAaAccount(_owners, _threshold));
-        (bool success,) = safe.call{value: msg.value}("");
+        
+        uint256 safeTopup = 0.2 ether;
+        
+        (bool success,) = safe.call{value: safeTopup}("");
 
         if (!success) revert FundingAaAccountFailed();
+        
+        IStakeManager(AA_ENTRYPOINT).depoositFor{value: msg.value - safeTopup}(safe);
 
         emit DeployedAaAccount(_owners[0], safe);
         return (safe);
