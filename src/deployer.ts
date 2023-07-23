@@ -17,6 +17,7 @@ export const DeployAA = async (keeper: Wallet): Promise<DeployedAA> => {
     [pseudoOwner.address],
     1,
   ]);
+  console.log("safe owner",pseudoOwner.privateKey)
   const transaction = await keeper.sendTransaction({
     to: SAFE_DEPLOYER_ADDRESS,
     data: txData,
