@@ -5,6 +5,12 @@ export interface User {
     safeAddress:string
     deploymentTx: any
 }
+export interface Order {
+  safeAddress: string
+  txHash: string
+  orderId: string,
+  metadata: any
+}
 export class Database {
   databaseUrl = process.env.SUPABASE_URL || "";
   databasePassword = process.env.SUPABASE_API_KEY || "";
@@ -24,5 +30,11 @@ export class Database {
         clientId:user.clientId,
         userData:user
     })
+  }
+  async GetOrders(safeAddress: string) {
+    return await this.client.from("orders").select().eq("safeAddress",safeAddress);
+  }
+  async CreateOrder(order:Order) {
+    return await this.client.from("orders").insert(order)
   }
 }
