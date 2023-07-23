@@ -5,15 +5,18 @@ import { BigNumber, ethers } from "ethers";
 import cors from "cors";
 import { NewKeeperSigner, SignKeeperMessage } from "./keeper";
 import { BuildSafeCallData, BuildUserOP, NewBundlerClient } from "./builder";
-import { Database, User } from "./database";
+import { Database, Order, User } from "./database";
 import { FetchPrices, GetDefillamaPrefix } from "./defillama";
 
 import { assets } from "./constants";
 import { DeployAA } from "./deployer";
+import { Get1inchRequest } from "./1inch";
 const app: Express = express();
 app.use(express.json());
 app.use(cors());
-const rpcProvider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+const rpcProvider = new ethers.providers.JsonRpcProvider(
+  process.env.ALCHEMY_URL || ""
+);
 const keeper = NewKeeperSigner(rpcProvider);
 const database = new Database();
 app.get("/user/:clientId", async (req: Request, resp: Response) => {
@@ -45,7 +48,7 @@ app.get("/assets/:chainId", async (req: Request, resp: Response) => {
             ]?.price || 0,
         },
       };
-    })
+    });
     resp.json({ data: tokens });
   } catch (error) {
     console.log(error);
@@ -53,29 +56,83 @@ app.get("/assets/:chainId", async (req: Request, resp: Response) => {
   }
 });
 app.post("/order", async (req: Request, resp: Response) => {
-  return resp.json({
-    data: {
-      orderId: "0x0000000001",
-      txHash: "0x0000000002",
-    },
-  });
+  try {
+    const { clientId } = req.body;
+    const userResponse = await database.GetUser(clientId);
+    const user = userResponse.data?.[0] || null;
+    if (!user) {
+      resp.json({ err: "no clientId defined or user not found" });
+      return;
+    }
+    console.log(user);
+    const safe = user.userData.safeAddress;
+    const bundlerClient = await NewBundlerClient();
+    const callData = await Get1inchRequest(
+      137,
+      safe,
+      "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      BigNumber.from(1e9).mul(1e8).mul(1).toString()
+    );
+    const safeCallData = BuildSafeCallData([
+      {
+        to: callData.to,
+        value: callData.value,
+        data: callData.data,
+      },
+    ]);
+    const userOrder = await database.GetOrders(safe);
+    console.log(userOrder.data);
+    let nonce =
+      userOrder.data?.filter((order) => {
+        console.log(order.txHash);
+        return order?.txHash != "";
+      }).length || 0;
+    const signature = await SignKeeperMessage(keeper, safe, safeCallData);
+    const userOP = await BuildUserOP(safe, safeCallData, signature, nonce + 1);
+    const res = await bundlerClient.sendUserOperation(userOP, {
+      onBuild: (op) => console.log("Signed UserOperation:", op),
+    });
+    console.log(`UserOpHash: ${res.userOpHash}`);
+    console.log("Waiting for transaction...");
+    const ev = await res.wait();
+    const txHash = ev?.transactionHash ?? "";
+    // const txHash = "test";
+    const order: Order = {
+      safeAddress: safe,
+      txHash: txHash,
+      orderId: ethers.utils.keccak256(ethers.utils.arrayify(callData.data)),
+      metadata: {
+        callData,
+        ev,
+        userOp: res,
+      },
+    };
+    console.log(await database.CreateOrder(order));
+    resp.json({ data: order });
+  } catch (error) {
+    console.log(error);
+    resp.json({ err: error });
+  }
 });
 app.get("/order/:safe", async (req: Request, resp: Response) => {
   console.log(req.params.safe);
-  return resp.json({
-    data: [
-      {
-        orderId: "0x0000000001",
-        txHash: "0x0000000002",
-      },
-    ],
+  const ordersResp = await database.GetOrders(req.params.safe);
+  resp.json({
+    data:
+      ordersResp.data?.map((order) => {
+        return {
+          ...order,
+          logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DUSDC.svg",
+        };
+      }) || [],
   });
 });
 app.post("/user/", async (req: Request, resp: Response) => {
   try {
     const { clientId } = req.body;
     if (!clientId) {
-      resp.json({ err: "no eao defined" });
+      resp.json({ err: "no clientId defined" });
     }
     const user = await database.GetUser(clientId);
     if (!user.data) {
@@ -89,7 +146,8 @@ app.post("/user/", async (req: Request, resp: Response) => {
       const receipt = await rpcProvider.getTransactionReceipt(
         deploymentMetadata.transaction.hash
       );
-      const safeAddress = receipt.logs[0].address;
+      console.log(receipt);
+      const safeAddress = receipt.logs[1].address;
       const newUser: User = {
         clientId: clientId,
         eoa: deploymentMetadata.pseudoOwner,
@@ -97,7 +155,7 @@ app.post("/user/", async (req: Request, resp: Response) => {
         deploymentTx: receipt,
       };
       const create = await database.CreateUser(newUser);
-      console.log(create)
+      console.log(create);
       // const topuptxn = await TopupSafe(safeAddress, keeper);
       // console.log(topuptxn);
       // await topuptxn.wait();
@@ -107,35 +165,9 @@ app.post("/user/", async (req: Request, resp: Response) => {
     resp.json({ data: user.data[0] });
     return;
   } catch (error) {
+    console.log(error);
     resp.json({ err: error });
   }
-});
-app.get("/send", async (req: Request, resp: Response) => {
-  const safe = "0x10E7F21665Ee8C16e7A9d192029DeE8bcA162Cee";
-  const bundlerClient = await NewBundlerClient();
-  const safeCallData = BuildSafeCallData([
-    {
-      to: "0x0405d9d1443DFB051D5e8E231e41C911Dc8393a4",
-      value: BigNumber.from("10000000").toString(),
-      data: "0x",
-    },
-    {
-      to: "0x5938551775B3c6F275EB3212B35b537fE4502dcD",
-      value: BigNumber.from("20000000").toString(),
-      data: "0x",
-    },
-  ]);
-  const signature = await SignKeeperMessage(keeper, safe, safeCallData);
-  const userOP = BuildUserOP(safe, safeCallData, signature);
-  const res = await bundlerClient.sendUserOperation(userOP, {
-    onBuild: (op) => console.log("Signed UserOperation:", op),
-  });
-  console.log(`UserOpHash: ${res.userOpHash}`);
-
-  console.log("Waiting for transaction...");
-  const ev = await res.wait();
-  console.log(`Transaction hash: ${ev?.transactionHash ?? null}`);
-  resp.json({ safe, safeCallData, signature, ev });
 });
 
 app.listen(process.env.PORT, () => {
