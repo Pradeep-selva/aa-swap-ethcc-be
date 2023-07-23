@@ -1,7 +1,7 @@
 import { BigNumber, Wallet } from "ethers";
 
 // const TOPUP_AMOUNT = "2000000000000000000"
-export const TOPUP_AMOUNT = BigNumber.from(1e9).mul(1e9).mul(2);
+export const TOPUP_AMOUNT = BigNumber.from(1e9).mul(1e9).mul(3);
 export const TopupSafe = async (safeAddress: string, funder: Wallet) => {
   const transaction = await funder.sendTransaction({
     to: safeAddress,
