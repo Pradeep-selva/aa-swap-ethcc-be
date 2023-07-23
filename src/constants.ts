@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 export const SAFE_DEPLOYER_ADDRESS =
-  "0xCbb54991908B79AA108a9d1e3e2E74911c99c85a";
+  "0x64e0aEa51495cf1F3A498a67dB561688796c4fD9";
 
 const SafeAAModuleABI = [
   {
@@ -333,6 +333,7 @@ const DeployerAbi = [
     type: "function",
   },
 ];
+const safeAbi = []
 export const SafeAAModuleInterface = new ethers.utils.Interface(
   SafeAAModuleABI
 );
@@ -389,26 +390,24 @@ export const assets = {
       value: "",
     },
   ],
-  100: [
+  137: [
     {
-      name: "xDAI",
+      name: "MATIC",
       address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-      logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png",
+      logo: "https://tokens.1inch.io/0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0.png",
       decimals: 18,
-      chainId: 100,
-      prices: { default: 1902.6 },
+      chainId: 137,
       apy: 0,
       actions: [] as any,
       value: "",
     },
    
     {
-      name: "WETH",
-      address: "0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1",
+      name: "USDC",
+      address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
       logo: "https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DWETH.svg",
-      decimals: 18,
-      chainId: 100,
-      prices: { default: 1903.57 },
+      decimals: 6,
+      chainId: 137,
       apy: 0,
       actions: [] as any,
       value: "",
